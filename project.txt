@@ -1,0 +1,58 @@
+{
+    "first_name": "preethi",
+    "last_name": "hp",
+    "username": "preethi",
+    "email":"preethi@gmail.com",
+    "phone": "1234567890",
+    "address": "Bangalore",
+    "password":"preethihp@1"
+}
+
+{
+"username": "preethi",
+"password":"preethihp@1"
+}
+
+{
+    "first_name": "priya",
+    "last_name": "hp",
+    "username": "priya",
+    "email":"priya@gmail.com",
+    "phone": "1234567899",
+    "address": "Bangalore",
+    "password":"priyahp@1"
+}
+{
+"username": "priya",
+"password":"priyahp@1"
+}
+
+
+{
+    "type":"kitchen"
+}
+
+{
+"name":"Magnum wardrobe",
+"description":"Compact is what you need, and compact is what you get with the Magnum wardrobe. ",
+"condition":"good",
+"noofdays":10,
+"category":4,
+"option":{
+	"size":"16L x 18B x 71H inches",
+	"color":"Natural brown",
+	"imageurl":"https://images.woodenstreet.de/image/cache/data%2Foffice-table%2Felif-work-station-table-exotic-teak-finish%2Fexotic-teak-finish%2F1-750x650.jpg",
+},
+"rental_option":[
+	{"tenure":3,"ratepermonth":"540"},
+	{"tenure":6,"ratepermonth":"500"},
+	{"tenure":9,"ratepermonth":"470"},
+	{"tenure":12,"ratepermonth":"420"}
+	]
+}
+
+{
+    "status": "ORDERED",
+    "product":1,
+    "customer": 1
+}
