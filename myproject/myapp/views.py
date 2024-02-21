@@ -17,11 +17,19 @@ class CustomerRegistrationAPIView(APIView):
         
     def post(self, request, *args, **kwargs):
         serializer = CustomerRegistrationSerializer(data=request.data)
+        username = request.data.get('username')
+
+        try:
+            user = User.objects.get(username=username)
+            raise serializers.ValidationError("Username Exists")
+        except User.DoesNotExist:
+            pass
+
         if serializer.is_valid():
             serializer.save()
-            
-            return Response({'message': 'Registration Successful'},status=status.HTTP_201_CREATED )
+            return Response({'message': 'Registration Successful'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 class CustomerLoginAPIView(APIView):
     
@@ -43,6 +51,8 @@ class CustomerLoginAPIView(APIView):
     
 class CategoryCreateAPIView(APIView):
     permission_classes=[IsAdminUser]
+    serializer_class = CategorySerializer
+    
     def post(self, request, *args, **kwargs):
         serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():

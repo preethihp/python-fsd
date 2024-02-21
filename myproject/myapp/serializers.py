@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from .models import *
-from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import  ValidationError as DjangoValidationError
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+import re
 
 class CustomerRegistrationSerializer(serializers.ModelSerializer):
     
@@ -12,13 +13,35 @@ class CustomerRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields =['first_name','last_name','phone','email','address','username','password']
+    
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+
+        # Check if email format is valid
+        try:
+            validate_email(email)
+        except ValidationError:
+            raise serializers.ValidationError("Invalid email format")
+
+        # Check password complexity (e.g., length)
+        if len(password) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long")
+        if not re.search(r'[A-Z]', password):
+            raise serializers.ValidationError("Password must contain at least one uppercase letter")
+        if not re.search(r'\d', password):
+            raise serializers.ValidationError("Password must contain at least one digit")
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            raise serializers.ValidationError("Password must contain at least one special character")
+
+        return data
 
     
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id','type']
+        fields = '__all__'
 
     def validate_type(self, value):
         if not value.strip():

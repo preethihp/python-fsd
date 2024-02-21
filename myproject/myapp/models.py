@@ -18,6 +18,7 @@ class User(AbstractUser):
 
 class Category(models.Model):
     type = models.CharField(max_length = 100)
+    image = models.ImageField()
 
 class Product(models.Model):
     name = models.CharField(max_length = 200)
