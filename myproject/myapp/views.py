@@ -4,55 +4,54 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import *
 from .models import *
+from rest_framework.permissions import IsAdminUser
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth import authenticate
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class CustomerRegistrationAPIView(APIView):
-    def get(self,request,*args,**kwargs):
+
+    def get(self, request, *args, **kwargs):
         result = User.objects.all()
-        serializer = CustomerRegistrationSerializer(result, many = True)
-        return Response({'status':'success','customer':serializer.data},status=200)
-        
+        serializer = CustomerRegistrationSerializer(result, many=True)
+        return Response({'status': 'success', 'customer': serializer.data}, status=200)
+
     def post(self, request, *args, **kwargs):
         serializer = CustomerRegistrationSerializer(data=request.data)
         username = request.data.get('username')
-
         try:
             user = User.objects.get(username=username)
-            raise serializers.ValidationError("Username Exists")
+            if user:
+                raise serializers.ValidationError("Username Exists")
         except User.DoesNotExist:
             pass
-
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Registration Successful'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
+
 class CustomerLoginAPIView(APIView):
-    
-    def post(self, request, *args, **kwargs):
-        serializer = CustomerRegistrationSerializer(data = request.data)
+
+    def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        #print(username,password)
-        user =User.objects.get ( username=username, password= password)
-        #print( user)
-        if user:
-            #login(request,user)
+
+        try:
+            user = User.objects.get(username=username, password=password)
+
+            if user:
+                return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        except ObjectDoesNotExist:
+            return Response({'error': 'Enter the Details'}, status=status.HTTP_401_UNAUTHORIZED)
+
            
-            serializer = CustomerRegistrationSerializer(user)
-            return Response( {'message':'Login Successful'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-    
-    
 class CategoryCreateAPIView(APIView):
-    permission_classes=[IsAdminUser]
-    serializer_class = CategorySerializer
-    
+    permission_classes = [IsAdminUser]
+
     def post(self, request, *args, **kwargs):
         serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():
@@ -60,16 +59,20 @@ class CategoryCreateAPIView(APIView):
             return Response({'message': 'Category created successfully'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ProductCreateAPIView(APIView):
     permission_classes = [IsAdminUser]
+
     def post(self, request, *args, **kwargs):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Product created successfully'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class ProductListByCategoryAPIView(APIView):
+
     def get(self, request, category_name, *args, **kwargs):
         try:
             category = Category.objects.get(type=category_name)
@@ -79,7 +82,23 @@ class ProductListByCategoryAPIView(APIView):
         except Category.DoesNotExist:
             return Response({'message': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
 
+
+class ProductDetailAPIView(APIView):
+
+    def get(self, request, category_name, product_id, *args, **kwargs):
+        try:
+            category = Category.objects.get(type=category_name)
+            item = Product.objects.get(category=category, id=product_id)
+            serializer = ProductSerializer(item)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Category.DoesNotExist:
+            return Response({'message': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Product.DoesNotExist:
+            return Response({'message': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        
 class CategoryListAPIView(APIView):
+
     def get(self, request, *args, **kwargs):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
@@ -90,7 +109,7 @@ class InvoiceSerializerAPIView(APIView):
     
     def post(self, request, *args, **kwargs):
         username = request.headers.get('username') 
-        password  = request.headers.get('password')
+        password = request.headers.get('password')
        
         try:
             customer = User.objects.get(username=username, password=password)
@@ -104,6 +123,7 @@ class InvoiceSerializerAPIView(APIView):
 
 
 class InvoiceStatusAPIView(APIView):
+
     def get(self, request, *args, **kwargs):
         order_status = request.query_params.get('status')
         username = request.headers.get('username') 
@@ -119,6 +139,7 @@ class InvoiceStatusAPIView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
 
 class PendingOrderAPIView(APIView):
     permission_classes = [IsAdminUser]

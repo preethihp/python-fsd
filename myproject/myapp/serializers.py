@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import *
-from django.core.exceptions import  ValidationError as DjangoValidationError
+from django.core.exceptions import  ValidationError 
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.core.validators import validate_email
@@ -17,6 +17,7 @@ class CustomerRegistrationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         email = data.get('email')
         password = data.get('password')
+        phone = data.get('phone')
 
         # Check if email format is valid
         try:
@@ -33,6 +34,10 @@ class CustomerRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Password must contain at least one digit")
         if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
             raise serializers.ValidationError("Password must contain at least one special character")
+        
+        #validating phone number
+        if not re.match(r'^\d{10}$', phone):
+            raise serializers.ValidationError("Invalid phone number format. Must be exactly 10 digits.")
 
         return data
 

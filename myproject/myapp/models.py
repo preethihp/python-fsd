@@ -18,7 +18,7 @@ class User(AbstractUser):
 
 class Category(models.Model):
     type = models.CharField(max_length = 100)
-    image = models.ImageField()
+    image = models.URLField(max_length=300)
 
 class Product(models.Model):
     name = models.CharField(max_length = 200)
@@ -28,8 +28,6 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     option = models.JSONField()
     rental_option= models.JSONField()
-
-
 
 class Invoice(models.Model):
     status_choices= [("ORDERED", 'ordered'), ("DELIVERED",'delivered'),("CANCELLED",'cancelled')]
